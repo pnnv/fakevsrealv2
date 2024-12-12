@@ -4,7 +4,7 @@ import { Verified } from 'lucide-react';
 
 export function Header() {
     return (
-        <header className="absolute w-full z-50">
+        <header className="fixed w-full z-50">
             <nav className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <div className="flex items-center justify-between h-16 rounded-lg backdrop-blur-lg bg-indigo-100/60"> 
                     <div className="flex items-justify">
@@ -14,6 +14,14 @@ export function Header() {
                         </NavLink>
                     </div>
                     <div className="flex space-x-4">
+                        <NavLink
+                            to="/unisearch"
+                            className={({ isActive }) =>
+                                `text-indigo-600 hover:text-indigo-800 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-indigo-100 text-indigo-800' : ''}`
+                            }
+                        >
+							Search User
+                        </NavLink>
                         <NavLink
                             to="/"
                             className={({ isActive }) =>

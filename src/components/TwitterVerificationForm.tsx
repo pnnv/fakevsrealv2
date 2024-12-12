@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Verified } from 'lucide-react';
-import { Link } from 'react-router-dom'; 
+import { Verified, AlertCircle, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { TwitterProfileInfo } from '../types/verification';
 
 export function TwitterVerificationForm() {
     const [accountUrl, setAccountUrl] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
+    const [isLoadingLinks, setIsLoadingLinks] = useState(false);
     const [verificationResult, setVerificationResult] = useState<any | null>(null);
+    const [socialLinks, setSocialLinks] = useState([]);
     const [error, setError] = useState('');
 
     const handleVerification = async () => {
@@ -35,16 +37,34 @@ export function TwitterVerificationForm() {
             const result = await response.json();
             setVerificationResult(result.profile_info);
 
+            // Fetch social links separately
+            setIsLoadingLinks(true);
+            const socialLinksResponse = await fetch('http://localhost:5000/social_links', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: accountUrl.trim() }),
+            });
+
+            if (!socialLinksResponse.ok) {
+                throw new Error(await socialLinksResponse.text());
+            }
+
+            const socialLinksResult = await socialLinksResponse.json();
+            setSocialLinks(socialLinksResult.social_links);
+
         } catch (err) {
             console.error(err);
             setError('An error occurred while analyzing the account');
         } finally {
             setIsVerifying(false);
+            setIsLoadingLinks(false);
         }
     };
 
     return (
-        <div className="bg-white rounded-xl shadow p-6 max-w-7xl mx-auto"> 
+        <div className="bg-white rounded-xl shadow p-6 max-w-7xl mx-auto">
             <div className="flex items-center mb-4">
                 <Verified className="h-8 w-8 text-indigo-600 mr-2" />
                 <h2 className="text-xl font-semibold">Twitter Account Verification</h2>
@@ -76,12 +96,12 @@ export function TwitterVerificationForm() {
             {verificationResult && (
                 <div className="mt-6">
                     <h3 className="text-lg font-medium mb-2">Account Information</h3>
-                    <div className="bg-gray-100 text-sm p-6 rounded font-mono whitespace-pre-wrap"> 
+                    <div className="bg-gray-100 text-sm p-6 rounded font-mono whitespace-pre-wrap">
                         <div>
                             <span className="font-bold text-gray-700">Screen Name:</span> {verificationResult.screen_name}
                         </div>
                         <div>
-                            <span className="font-bold text-gray-700">Full Name:</span> {verificationResult.full_name}
+                            <span className="font-bold text-gray-700">Full Name:</span> {verificationResult.name}
                         </div>
                         <div>
                             <span className="font-bold text-gray-700">Location:</span> {verificationResult.location || "N/A"}
@@ -123,8 +143,38 @@ export function TwitterVerificationForm() {
                             <span className="font-bold text-gray-700">Tweet Content:</span> {verificationResult.tweet_content || "N/A"}
                         </div>
                     </div>
-                    <Link to="/report" state={{ profileInfo: verificationResult as TwitterProfileInfo }}> 
-                        <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"> 
+
+                    {/* Display social links with loading indicator */}
+                    <div className="mt-4">
+                        <h3 className="text-lg font-medium mb-2">Accounts with same username on other platforms</h3>
+                        {isLoadingLinks ? (
+                            <p className="text-gray-600 text-sm">Checking for external links...</p>
+                        ) : (
+                            <>
+                                {socialLinks.length > 0 ? (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                        {socialLinks.map((link, index) => (
+                                            <a
+                                                key={index}
+                                                href={link.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="bg-green-100 hover:bg-green-400 text-blue-700 font-medium py-2 px-4 rounded-10 inline-flex items-center"
+                                            >
+                                                <span className="mr-2">{link.platform}</span>
+                                                <svg className="fill-current w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" /><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" /></svg>
+                                            </a>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-600 text-sm">No other social media presence found.</p>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    <Link to="/report" state={{ profileInfo: verificationResult as TwitterProfileInfo }}>
+                        <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4">
                             Report Account
                         </button>
                     </Link>

@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { ReportPage } from './pages/ReportPage';
 import { AdminPage } from './pages/AdminPage';
 import { TwitterPage } from './pages/TwitterPage';
+import { Unipage } from './pages/Unipage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/report" element={<ReportPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/twitter" element={<TwitterPage />} />
+            <Route path="/unisearch" element={<Unipage />} />
           </Routes>
         </main>
       </div>
