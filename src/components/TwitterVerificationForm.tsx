@@ -3,6 +3,19 @@ import { Verified, AlertCircle, CheckCircle, XCircle, ChevronDown, ChevronUp } f
 import { Link } from 'react-router-dom';
 import type { TwitterProfileInfo } from '../types/verification';
 
+const statusIcons = {
+    pass: CheckCircle,
+    fail: XCircle,
+    warning: AlertCircle,
+};
+
+const statusColors = {
+    pass: 'text-green-600',
+    fail: 'text-red-600',
+    warning: 'text-yellow-600',
+};
+
+
 export function TwitterVerificationForm() {
     const [accountUrl, setAccountUrl] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
@@ -10,6 +23,8 @@ export function TwitterVerificationForm() {
     const [verificationResult, setVerificationResult] = useState<any | null>(null);
     const [socialLinks, setSocialLinks] = useState([]);
     const [error, setError] = useState('');
+    const [fakeProbability, setFakeProbability] = useState<number | null>(null);
+    const [isFake, setIsFake] = useState<boolean | null>(null);
 
     const handleVerification = async () => {
         if (!accountUrl.trim() || !/^[a-zA-Z0-9_.]+$/.test(accountUrl.trim())) {
@@ -36,6 +51,8 @@ export function TwitterVerificationForm() {
 
             const result = await response.json();
             setVerificationResult(result.profile_info);
+            setFakeProbability(result.fake_probability); 
+            setIsFake(result.is_fake); 
 
             // Fetch social links separately
             setIsLoadingLinks(true);
@@ -94,7 +111,42 @@ export function TwitterVerificationForm() {
             </div>
 
             {verificationResult && (
-                <div className="mt-6">
+                <div className="mt-6 space-y-4"> 
+                    <div className={`p-4 rounded-lg flex items-center 
+                                    ${verificationResult.verified 
+                                        ? 'bg-blue-50 text-blue-700'  // Blue for verified
+                                        : isFake 
+                                            ? 'bg-red-50 text-red-700' 
+                                            : 'bg-green-50 text-green-700'}`}>
+                        {verificationResult.verified && ( // Show Verified icon if verified
+                            <Verified className="h-6 w-6 mr-3 text-blue-600" /> 
+                        )}
+                        {!verificationResult.verified && React.createElement( // Show other icons if not verified
+                            statusIcons[isFake ? 'fail' : 'pass'], 
+                            { className: `h-6 w-6 mr-3 ${isFake ? 'text-red-600' : 'text-green-600'}` }
+                        )}
+                        <div>
+                            <h3 className={`font-medium text-lg 
+                                            ${verificationResult.verified
+                                                ? 'text-blue-700' 
+                                                : isFake 
+                                                    ? 'text-red-700' 
+                                                    : 'text-green-700'}`}>
+                                {verificationResult.verified
+                                    ? 'Verified Account' 
+                                    : isFake 
+                                        ? 'Fake Account Suspected' 
+                                        : 'Genuine Account'}
+                            </h3>
+                            <p className="text-gray-600 text-sm">
+                                {isFake
+                                    ? 'This account shows signs of being fake.'
+                                    : 'This account appears to be real.'}
+                            </p> 
+                            <p className="text-gray-600 text-sm">Probability: {Math.round(fakeProbability * 100)}%</p>
+                        </div>
+                    </div>
+
                     <h3 className="text-lg font-medium mb-2">Account Information</h3>
                     <div className="bg-gray-100 text-sm p-6 rounded font-mono whitespace-pre-wrap">
                         <div>
@@ -144,7 +196,6 @@ export function TwitterVerificationForm() {
                         </div>
                     </div>
 
-                    {/* Display social links with loading indicator */}
                     <div className="mt-4">
                         <h3 className="text-lg font-medium mb-2">Accounts with same username on other platforms</h3>
                         {isLoadingLinks ? (

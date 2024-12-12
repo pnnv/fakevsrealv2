@@ -340,7 +340,7 @@ def extract_features_twitter(html_content, thtml_content, username):
         "statuses_count": extract_stat("Tweets"),
         "lang": "en", 
         "status": recent_tweet.find('div', class_='tweet-content media-body').get_text(strip=True) if recent_tweet else None,  # Extract recent tweet content
-        "avatar_image": soup.select_one("meta[property='og:image']")['content'] if soup.select_one("meta[property='og:image']") else None,
+        "avatar_image": soup.select_one(".profile-card-avatar img")['src'] if soup.select_one(".profile-card-avatar img") else None,
         "default_profile": None,
         "default_profile_image": (
             soup.select_one(".profile-card-avatar img")['src'] == "/pic/abs.twimg.com%2Fsticky%2Fdefault_profile_images%2Fdefault_profile_400x400.png"

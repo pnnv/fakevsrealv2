@@ -3,20 +3,43 @@ import { AlertCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useReportsStore } from '../store/reportsStore';
 import type { TwitterProfileInfo } from './verification'; // Import the interface
+import type { InstagramProfileInfo } from './InstagramVerification'; // Import the interface
 
 export function ReportForm() {
   const location = useLocation();
   const twitterProfileInfo = location.state?.profileInfo as TwitterProfileInfo | undefined;
+  const instagramProfileInfo = location.state?.profileInfo as InstagramProfileInfo | undefined;
   const [email, setEmail] = useState('');
-  const [platform, setPlatform] = useState('twitter');
-  const [accountUrl, setAccountUrl] = useState(twitterProfileInfo?.url || ''); 
+  const [platform, setPlatform] = useState(() => {
+    if (twitterProfileInfo) {
+      return 'twitter'}
+    else if (instagramProfileInfo) {
+      return 'instagram'
+    } else {
+      return ' '
+    }
+  }); 
+  const [accountUrl, setAccountUrl] = useState(() => {
+    if (twitterProfileInfo) {
+      return twitterProfileInfo?.url
+    } else if (instagramProfileInfo) {
+      return "https://instagram.com/"+instagramProfileInfo?.username
+    } else {
+      return ' '
+    }
+  }); 
   const [reason, setReason] = useState('');
   const [evidence, setEvidence] = useState(() => {
     if (twitterProfileInfo) {
       return Object.entries(twitterProfileInfo)
         .map(([key, value]) => `${key}: ${value}`)
         .join('\n\n');
-    } else {
+    } else if (instagramProfileInfo) {
+      return Object.entries(instagramProfileInfo)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n\n');
+    } 
+    else {
       return '';
     }
   });

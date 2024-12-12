@@ -10,7 +10,7 @@ export function Header() {
                     <div className="flex items-justify">
                         <NavLink to="/" className="flex items-justify">
                             <Verified className="h-8 w-8 text-indigo-600 ml-8" />
-                            <span className="ml-2 text-indigo-600 font-bold text-xl">prototype :3</span>
+                            <span className="ml-2 text-indigo-600 font-bold text-xl">fotodile</span>
                         </NavLink>
                     </div>
                     <div className="flex space-x-4">
