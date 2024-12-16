@@ -111,5 +111,5 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ---
 
 ## Contact
-For queries or support, reach out through the [Issues](https://github.com/your-repo/issues) section.
+For queries or support, reach out through the [Issues](https://github.com/fotodile/issues) section.
 
